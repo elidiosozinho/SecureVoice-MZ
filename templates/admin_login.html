@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card report-card">
+  <div class="report-header">
+    <h2>Admin Login</h2>
+    <p>Aceda ao painel de administração.</p>
+  </div>
+
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <p class="{% if category == 'success' %}success-message{% else %}error{% endif %}">{{ message }}</p>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+  <form method="post" class="report-form">
+    <div class="form-group">
+      <label for="username">Utilizador</label>
+      <input type="text" id="username" name="username" required>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Palavra-passe</label>
+      <input type="password" id="password" name="password" required>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Entrar</button>
+  </form>
+</div>
+{% endblock %}

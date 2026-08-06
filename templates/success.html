@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card success-card">
+  <h2>A sua denúncia foi recebida com sucesso.</h2>
+  <p>A sua voz faz a diferença. Obrigado por contribuir para um futuro melhor.</p>
+  {% if tracking_code %}
+  <p><strong>Código de acompanhamento:</strong> {{ tracking_code }}</p>
+  <p>Guarde este código para verificar o estado da sua denúncia.</p>
+  {% endif %}
+  <div class="success-actions">
+    <a class="btn btn-primary" href="{{ url_for('report_bp.report') }}">Fazer outra denúncia</a>
+    <a class="btn btn-secondary" href="{{ url_for('main.verificar') }}">Verificar denúncia</a>
+    <a class="btn btn-secondary" href="{{ url_for('main.index') }}">Voltar ao início</a>
+  </div>
+</div>
+{% endblock %}

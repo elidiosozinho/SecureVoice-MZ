@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="pt">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SecureVoice MZ</title>
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='favicon.jpeg') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  </head>
+  <body>
+    <nav class="navbar">
+      <a href="{{ url_for('main.index') }}" class="brand">
+        <img class="brand-favicon" src="{{ url_for('static', filename='favicon.jpeg') }}" alt="SecureVoice MZ logo">
+        <span class="brand-title"><span class="brand-black">SecureVoice</span><span class="brand-green"> MZ</span></span>
+      </a>
+      <div class="nav-links">
+        <a href="{{ url_for('main.index') }}">Início</a>
+      </div>
+    </nav>
+
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+  </body>
+</html>

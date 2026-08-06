@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card admin-card">
+  <div class="admin-header">
+    <div>
+      <h2>Painel Administrativo</h2>
+      <p>Gestão central das denúncias recebidas.</p>
+    </div>
+    <div class="admin-profile-card">
+      <div class="admin-profile-info">
+        <strong>{{ admin_username or '—' }}</strong>
+        <span>Login às {{ login_time or '—' }}</span>
+      </div>
+      <div class="admin-actions">
+        <a class="btn btn-secondary" href="{{ url_for('main.index') }}">Voltar ao início</a>
+        <a class="btn btn-secondary" href="{{ url_for('admin_bp.logout') }}">Sair</a>
+      </div>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div class="admin-flash">
+        {% for category, message in messages %}
+          <p class="{% if category == 'success' %}success-message{% else %}error{% endif %}">{{ message }}</p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  <div class="admin-stats">
+    <div class="stat-card">
+      <span class="stat-label">Total denúncias</span>
+      <strong>{{ total_reports }}</strong>
+    </div>
+    <div class="stat-card">
+      <span class="stat-label">Última denúncia recebida</span>
+      <strong>{{ last_activity }}</strong>
+    </div>
+  </div>
+
+  {% if reports %}
+  <div class="table-wrap">
+    <table class="report-table">
+      <thead>
+        <tr>
+          <th>Categoria</th>
+          <th>Descrição</th>
+          <th>Status</th>
+          <th>Telefone</th>
+          <th>Email</th>
+          <th>Criado em</th>
+          <th>Imagem</th>
+          <th>Código</th>
+          <th>Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for report in reports %}
+        <tr>
+          <td>{{ report.category }}</td>
+          <td>{{ report.description }}</td>
+          <td><span class="status-badge status-{{ report.status|lower|replace(' ', '-') }}">{{ report.status }}</span></td>
+          <td>{{ report.phone or '—' }}</td>
+          <td>{{ report.email or '—' }}</td>
+          <td>{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+          <td>
+            {% if report.image_filename %}
+              <a href="{{ url_for('static', filename='uploads/' ~ report.image_filename) }}" target="_blank">Ver imagem</a>
+            {% else %}
+              Nenhuma
+            {% endif %}
+          </td>
+          <td>{{ report.tracking_code }}</td>
+          <td>
+            <form method="post" action="{{ url_for('admin_bp.update_status', report_id=report.id) }}" class="status-form">
+              <select name="status">
+                <option value="Recebido" {% if report.status == 'Recebido' %}selected{% endif %}>Recebido</option>
+                <option value="Em análise" {% if report.status == 'Em análise' %}selected{% endif %}>Em análise</option>
+                <option value="Resolvido" {% if report.status == 'Resolvido' %}selected{% endif %}>Resolvido</option>
+              </select>
+              <button type="submit" class="btn btn-small">Guardar</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+    <p>Nenhuma denúncia registada ainda.</p>
+  {% endif %}
+</div>
+{% endblock %}

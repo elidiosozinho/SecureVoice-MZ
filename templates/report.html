@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="card report-card">
+  <div class="report-header">
+    <h2>Submeter Denúncia</h2>
+    <p>Preencha os dados abaixo. A sua identidade será protegida.</p>
+  </div>
+
+  {% if error %}
+    <p class="error">{{ error }}</p>
+  {% endif %}
+
+  <form method="post" enctype="multipart/form-data" class="report-form">
+    <div class="form-group">
+      <label for="category">Categoria</label>
+      <select id="category" name="category" required>
+        <option value="">Selecione</option>
+        <option value="Violência">Violência</option>
+        <option value="Corrupção">Corrupção</option>
+        <option value="Trânsito">Trânsito</option>
+        <option value="Outro">Outro</option>
+      </select>
+    </div>
+
+    <div class="form-grid">
+      <div class="form-group">
+        <label for="province">Província</label>
+        <select id="province" name="province">
+          <option value="">Selecione a Província</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="district">Distrito</label>
+        <select id="district" name="district" disabled>
+          <option value="">Selecione o Distrito</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="description">Descrição</label>
+      <textarea id="description" name="description" rows="5" required></textarea>
+    </div>
+
+    <div class="form-group">
+      <label>Contacto (opcional)</label>
+      <div class="phone-inline">
+        <span class="phone-prefix" aria-hidden="true">+258</span>
+        <input type="tel" id="phone" name="phone" inputmode="numeric" pattern="[0-9]{8,9}" placeholder="número do telefone">
+      </div>
+      <input type="email" id="email" name="email" placeholder="exemplo@email.com">
+      <small class="form-help">Apenas preencha se desejar ser contactado para acompanhamento da denúncia.</small>
+    </div>
+
+    <div class="form-group">
+      <label for="image">Imagem (opcional)</label>
+      <input type="file" id="image" name="image" accept="image/*">
+    </div>
+
+    <button class="btn btn-primary" type="submit">Enviar Denúncia</button>
+  </form>
+</div>
+{% endblock %}
