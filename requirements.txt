@@ -1,0 +1,6 @@
+flask
+gunicorn
+flask-mail
+flask-sqlalchemy
+reportlab
+twilio

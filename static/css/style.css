@@ -453,6 +453,7 @@ select:disabled {
   width: 100%;
   border-collapse: collapse;
   margin-top: 12px;
+  table-layout: auto;
 }
 
 .report-table th, .report-table td {
@@ -463,12 +464,104 @@ select:disabled {
 
 .report-table th {
   background: #f0f4f8;
+  white-space: nowrap;
+}
+
+.report-table td {
+  word-wrap: break-word;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.report-table .column-category {
+  min-width: 110px;
+}
+
+.report-table .column-urgency {
+  min-width: 90px;
+}
+
+.report-table .column-description {
+  width: 220px;
+  min-width: 190px;
+}
+
+.report-table .column-status {
+  min-width: 105px;
+}
+
+.report-table .column-location {
+  min-width: 105px;
+}
+
+.report-table .column-date {
+  min-width: 125px;
+  white-space: nowrap;
+}
+
+.report-table .column-code {
+  min-width: 125px;
+  max-width: 150px;
+  font-family: monospace;
+  overflow-wrap: anywhere;
+}
+
+.report-table .column-email {
+  min-width: 200px;
+  word-break: break-word;
+}
+
+.table-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin: 12px 0;
+}
+
+.description-preview {
+  display: block;
+  margin-bottom: 6px;
+}
+
+.description-details summary {
+  color: #0b3d91;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.description-details div {
+  margin-top: 8px;
+  max-width: 360px;
+  white-space: pre-wrap;
+}
+
+.description-details label {
+  display: block;
+  margin-top: 12px;
+  font-weight: 700;
+}
+
+.admin-notes-input {
+  width: 100%;
+  min-height: 72px;
+  margin-top: 6px;
+  box-sizing: border-box;
+  resize: vertical;
 }
 
 .status-form {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.delete-form {
+  margin-top: 8px;
+}
+
+.btn-danger {
+  background: #c0392b;
+  color: #fff;
+  border-color: #c0392b;
 }
 
 .admin-header {
@@ -518,7 +611,7 @@ select:disabled {
 
 .admin-stats {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
   margin-bottom: 16px;
 }
@@ -542,6 +635,10 @@ select:disabled {
   font-size: 1.05rem;
 }
 
+.stat-card-wide {
+  grid-column: span 2;
+}
+
 .status-badge {
   display: inline-block;
   padding: 4px 10px;
@@ -551,18 +648,113 @@ select:disabled {
 }
 
 .status-recebido {
-  background: #e9ecef;
-  color: #495057;
+  background: #fff3cd;
+  color: #8a6d3b;
 }
 
 .status-em-análise {
-  background: #fff3cd;
-  color: #8a6d3b;
+  background: #cfe2ff;
+  color: #084298;
 }
 
 .status-resolvido {
   background: #d4edda;
   color: #155724;
+}
+
+.urgency-badge {
+  display: inline-block;
+  padding: 4px 8px;
+  border-radius: 999px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.urgency-urgente {
+  background: #f8d7da;
+  color: #842029;
+}
+
+.urgency-alta {
+  background: #ffe5b4;
+  color: #9a4d00;
+}
+
+.urgency-media {
+  background: #cfe2ff;
+  color: #084298;
+}
+
+.urgency-baixa {
+  background: #e9ecef;
+  color: #495057;
+}
+
+.admin-filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 16px 0;
+}
+
+.admin-filters a {
+  padding: 8px 12px;
+  border: 1px solid #d7e0e8;
+  border-radius: 6px;
+  color: #0b3d91;
+  text-decoration: none;
+}
+
+.admin-filters a.active {
+  background: #0b3d91;
+  color: #fff;
+}
+
+.admin-charts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.chart-panel {
+  width: 100%;
+  height: 280px;
+  max-height: 280px;
+  padding: 16px;
+  border: 1px solid #e3ebf3;
+  border-radius: 8px;
+}
+
+.chart-canvas-wrap {
+  position: relative;
+  height: 210px;
+  max-height: 210px;
+}
+
+.chart-canvas-wrap canvas {
+  display: block;
+  max-width: 100%;
+  max-height: 210px;
+}
+
+.chart-panel h3 {
+  margin-top: 0;
+}
+
+@media (max-width: 800px) {
+  .admin-stats {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat-card-wide {
+    grid-column: span 1;
+  }
+
+  .admin-charts {
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 800px) {
@@ -606,5 +798,117 @@ select:disabled {
 @media (max-width: 520px) {
   .features-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 8mm;
+  }
+
+  body {
+    background: white !important;
+    color: black !important;
+  }
+
+  .no-print,
+  .btn,
+  nav,
+  .sidebar,
+  .action-buttons,
+  footer,
+  .chart-container,
+  .admin-charts,
+  .admin-filters,
+  .column-actions,
+  .description-details {
+    display: none !important;
+  }
+
+  .container,
+  .card,
+  .admin-card,
+  .table-wrap {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+    box-shadow: none !important;
+  }
+
+  .table-wrap,
+  .table-responsive,
+  table,
+  .report-table,
+  .report-table table {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    table-layout: fixed !important;
+    font-size: 8.5pt !important;
+  }
+
+  .report-table {
+    border-collapse: collapse !important;
+  }
+
+  .report-table th,
+  .report-table td,
+  th,
+  td {
+    word-break: break-all !important;
+    white-space: normal !important;
+    padding: 4px 2px !important;
+  }
+
+  .report-table .column-description {
+    width: 17% !important;
+    min-width: 0 !important;
+  }
+
+  .report-table .column-email {
+    min-width: 0 !important;
+    width: 12% !important;
+  }
+
+  .report-table .column-code,
+  .report-table .column-location,
+  .report-table .column-category,
+  .report-table .column-status,
+  .report-table .column-date {
+    min-width: 0 !important;
+    max-width: none !important;
+    width: auto !important;
+  }
+
+  .admin-header {
+    border-bottom: 1px solid #999;
+    margin-bottom: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .admin-stats {
+    grid-template-columns: repeat(4, 1fr) !important;
+    gap: 4px !important;
+    margin-bottom: 8px !important;
+  }
+
+  .stat-card {
+    padding: 5px !important;
+    border: 1px solid #999 !important;
+    background: white !important;
+  }
+
+  .stat-card-wide {
+    display: none !important;
+  }
+
+  .status-badge {
+    padding: 2px !important;
+    background: white !important;
+    color: black !important;
+    border: 1px solid #777;
   }
 }

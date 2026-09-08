@@ -25,9 +25,13 @@ class Report(db.Model):
     description = db.Column(db.Text, nullable=False)
     phone = db.Column(db.String(50), nullable=True)
     email = db.Column(db.String(255), nullable=True)
+    province = db.Column(db.String(100), nullable=True, default="")
+    district = db.Column(db.String(100), nullable=True, default="")
     image_filename = db.Column(db.String(255), nullable=True)
     tracking_code = db.Column(db.String(50), nullable=False, unique=True)
-    status = db.Column(db.String(50), default="Recebido", nullable=False)
+    status = db.Column(db.String(50), default="Recebido")
+    urgency = db.Column(db.String(50), default="Média")
+    admin_notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
 
     def __repr__(self):

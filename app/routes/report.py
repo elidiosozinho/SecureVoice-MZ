@@ -1,15 +1,63 @@
 import os
 import uuid
+from io import BytesIO
 
-from flask import Blueprint, current_app, redirect, render_template, request, url_for, flash
+from flask import Blueprint, current_app, redirect, render_template, request, url_for
+from flask_mail import Message
 from werkzeug.utils import secure_filename
 
+from app.extensions import mail
 from app.models import Report, db
 
 report_bp = Blueprint("report_bp", __name__)
 
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
 MAX_FILE_SIZE = 2 * 1024 * 1024
+
+
+def _build_receipt_pdf(report):
+    from reportlab.lib.pagesizes import A4
+    from reportlab.pdfgen import canvas
+
+    buffer = BytesIO()
+    document = canvas.Canvas(buffer, pagesize=A4)
+    _, page_height = A4
+    document.setTitle(f"Comprovativo {report.tracking_code}")
+    document.setFont("Helvetica-Bold", 16)
+    document.drawString(48, page_height - 64, "SecureVoice MZ")
+    document.setFont("Helvetica", 11)
+    lines = [
+        "Comprovativo da sua denúncia",
+        "",
+        f"Código de acompanhamento: {report.tracking_code}",
+        f"Categoria: {report.category}",
+        f"Província: {report.province or '—'}",
+        f"Distrito: {report.district or '—'}",
+        f"Nível de urgência: {report.urgency or 'Média'}",
+        f"Data: {report.created_at.strftime('%d/%m/%Y %H:%M')}",
+        "",
+        "Descrição:",
+    ]
+    y_position = page_height - 100
+    for line in lines:
+        document.drawString(48, y_position, line[:110])
+        y_position -= 18
+    for paragraph_line in report.description.splitlines():
+        document.drawString(48, y_position, paragraph_line[:110])
+        y_position -= 16
+        if y_position < 48:
+            document.showPage()
+            y_position = page_height - 48
+    document.save()
+    buffer.seek(0)
+    return buffer.read()
+
+
+def _format_phone_number(phone):
+    digits = "".join(character for character in phone if character.isdigit())
+    if digits.startswith("258"):
+        return f"+{digits}"
+    return f"+258{digits}"
 
 
 def _allowed_file(filename: str) -> bool:
@@ -39,10 +87,16 @@ def report():
         description = request.form.get("description", "").strip()
         phone = request.form.get("phone", "").strip() or None
         email = request.form.get("email", "").strip() or None
+        province = request.form.get("province", "").strip() or None
+        district = request.form.get("district", "").strip() or None
+        urgency = request.form.get("urgency", "Média").strip()
         uploaded_file = request.files.get("image")
 
-        if not category or not description:
-            return render_template("report.html", error="Preencha a categoria e a descrição.")
+        if not category or not description or not email:
+            return render_template("report.html", error="Preencha a categoria, a descrição e o email.")
+
+        if urgency not in {"Baixa", "Média", "Alta", "Urgente"}:
+            urgency = "Média"
 
         image_filename = None
         if uploaded_file and uploaded_file.filename:
@@ -57,13 +111,83 @@ def report():
             description=description,
             phone=phone,
             email=email,
+            province=province,
+            district=district,
             image_filename=image_filename,
             tracking_code=tracking_code,
             status="Recebido",
+            urgency=urgency,
         )
         db.session.add(report)
         db.session.commit()
 
-        return redirect(url_for("main.success", tracking_code=tracking_code))
+        email_sent = False
+        receipt_pdf = None
+        try:
+            receipt_pdf = _build_receipt_pdf(report)
+            user_message = Message(
+                subject="Comprovativo da sua denúncia - SecureVoice MZ",
+                recipients=[report.email],
+                body=(
+                    "A sua denúncia foi recebida com sucesso.\n\n"
+                    f"Código de acompanhamento: {report.tracking_code}\n\n"
+                    "Guarde este código para acompanhar o estado da denúncia em SecureVoice MZ.\n"
+                    "O comprovativo segue em anexo."
+                ),
+            )
+            user_message.attach(
+                f"comprovativo-{report.tracking_code}.pdf",
+                "application/pdf",
+                receipt_pdf,
+            )
+            if current_app.config.get("MAIL_USERNAME") and current_app.config.get("MAIL_PASSWORD"):
+                mail.send(user_message)
+                email_sent = True
+        except Exception:
+            current_app.logger.exception("Não foi possível enviar o comprovativo por email.")
+
+        admin_email = current_app.config.get("MAIL_USERNAME")
+        if admin_email and current_app.config.get("MAIL_PASSWORD"):
+            message = Message(
+                subject=f"Nova denúncia recebida - Código: {report.tracking_code}",
+                recipients=[admin_email],
+                body=(
+                    f"Código: {report.tracking_code}\n"
+                    f"Categoria: {report.category}\n"
+                    f"Província: {report.province or '—'}\n"
+                    f"Distrito: {report.district or '—'}\n\n"
+                    "Descrição completa da denúncia:\n"
+                    f"{report.description}"
+                ),
+            )
+            try:
+                mail.send(message)
+            except Exception:
+                current_app.logger.exception("Não foi possível enviar a notificação da denúncia.")
+
+        twilio_settings = (
+            current_app.config.get("TWILIO_ACCOUNT_SID"),
+            current_app.config.get("TWILIO_AUTH_TOKEN"),
+            current_app.config.get("TWILIO_PHONE_NUMBER"),
+        )
+        if report.phone and all(twilio_settings):
+            try:
+                from twilio.rest import Client
+
+                Client(twilio_settings[0], twilio_settings[1]).messages.create(
+                    body=f"SecureVoice MZ: Denúncia recebida. Código: {report.tracking_code}",
+                    from_=twilio_settings[2],
+                    to=_format_phone_number(report.phone),
+                )
+            except Exception:
+                current_app.logger.exception("Não foi possível enviar o SMS de confirmação.")
+
+        return redirect(
+            url_for(
+                "main.success",
+                tracking_code=tracking_code,
+                email_sent="1" if email_sent else "0",
+            )
+        )
 
     return render_template("report.html")

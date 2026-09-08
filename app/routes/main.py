@@ -13,7 +13,8 @@ def index():
 @main.route("/success")
 def success():
     tracking_code = request.args.get("tracking_code")
-    return render_template("success.html", tracking_code=tracking_code)
+    email_sent = request.args.get("email_sent") == "1"
+    return render_template("success.html", tracking_code=tracking_code, email_sent=email_sent)
 
 
 @main.route("/verificar", methods=["GET", "POST"])

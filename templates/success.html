@@ -7,6 +7,11 @@
   {% if tracking_code %}
   <p><strong>Código de acompanhamento:</strong> {{ tracking_code }}</p>
   <p>Guarde este código para verificar o estado da sua denúncia.</p>
+  {% if email_sent %}
+  <p>A sua denúncia foi recebida com sucesso.<br>Foi enviado um comprovativo para o seu email.</p>
+  {% else %}
+  <p>A sua denúncia foi recebida com sucesso. O comprovativo não pôde ser enviado neste momento.</p>
+  {% endif %}
   {% endif %}
   <div class="success-actions">
     <a class="btn btn-primary" href="{{ url_for('report_bp.report') }}">Fazer outra denúncia</a>
