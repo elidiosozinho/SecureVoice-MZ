@@ -1,11 +1,13 @@
 import os
 from datetime import datetime
+from io import BytesIO
 
-from flask import Blueprint, current_app, flash, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, current_app, flash, jsonify, redirect, render_template, request, send_file, session, url_for
 from sqlalchemy import func
 from werkzeug.security import check_password_hash
 
 from app.models import Admin, Report, db
+from app.pdf import generate_admin_pdf
 
 admin_bp = Blueprint("admin_bp", __name__)
 
@@ -119,6 +121,21 @@ def update_status(report_id):
     if new_status in {"Recebido", "Em análise", "Resolvido"} or admin_notes is not None:
         db.session.commit()
     return redirect(url_for("admin_bp.admin"))
+
+
+@admin_bp.route("/admin/download/<int:id>")
+def download_admin_pdf(id):
+    if not session.get("admin_logged_in"):
+        return redirect("/admin/login")
+
+    report = Report.query.get_or_404(id)
+    pdf = generate_admin_pdf(report)
+    return send_file(
+        BytesIO(pdf),
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"Admin_Report_{report.tracking_code}.pdf",
+    )
 
 
 @admin_bp.route("/admin/delete/<int:id>", methods=["POST"])

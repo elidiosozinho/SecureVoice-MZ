@@ -2,55 +2,18 @@ import os
 import uuid
 from io import BytesIO
 
-from flask import Blueprint, current_app, redirect, render_template, request, url_for
+from flask import Blueprint, current_app, redirect, render_template, request, send_file, url_for
 from flask_mail import Message
 from werkzeug.utils import secure_filename
 
 from app.extensions import mail
 from app.models import Report, db
+from app.pdf import generate_user_pdf
 
 report_bp = Blueprint("report_bp", __name__)
 
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
 MAX_FILE_SIZE = 2 * 1024 * 1024
-
-
-def _build_receipt_pdf(report):
-    from reportlab.lib.pagesizes import A4
-    from reportlab.pdfgen import canvas
-
-    buffer = BytesIO()
-    document = canvas.Canvas(buffer, pagesize=A4)
-    _, page_height = A4
-    document.setTitle(f"Comprovativo {report.tracking_code}")
-    document.setFont("Helvetica-Bold", 16)
-    document.drawString(48, page_height - 64, "SecureVoice MZ")
-    document.setFont("Helvetica", 11)
-    lines = [
-        "Comprovativo da sua denúncia",
-        "",
-        f"Código de acompanhamento: {report.tracking_code}",
-        f"Categoria: {report.category}",
-        f"Província: {report.province or '—'}",
-        f"Distrito: {report.district or '—'}",
-        f"Nível de urgência: {report.urgency or 'Média'}",
-        f"Data: {report.created_at.strftime('%d/%m/%Y %H:%M')}",
-        "",
-        "Descrição:",
-    ]
-    y_position = page_height - 100
-    for line in lines:
-        document.drawString(48, y_position, line[:110])
-        y_position -= 18
-    for paragraph_line in report.description.splitlines():
-        document.drawString(48, y_position, paragraph_line[:110])
-        y_position -= 16
-        if y_position < 48:
-            document.showPage()
-            y_position = page_height - 48
-    document.save()
-    buffer.seek(0)
-    return buffer.read()
 
 
 def _format_phone_number(phone):
@@ -92,8 +55,8 @@ def report():
         urgency = request.form.get("urgency", "Média").strip()
         uploaded_file = request.files.get("image")
 
-        if not category or not description or not email:
-            return render_template("report.html", error="Preencha a categoria, a descrição e o email.")
+        if not category or not description or not phone or not email or not province or not district:
+            return render_template("report.html", error="Preencha todos os campos de contacto e denúncia.")
 
         if urgency not in {"Baixa", "Média", "Alta", "Urgente"}:
             urgency = "Média"
@@ -124,7 +87,7 @@ def report():
         email_sent = False
         receipt_pdf = None
         try:
-            receipt_pdf = _build_receipt_pdf(report)
+            receipt_pdf = generate_user_pdf(report)
             user_message = Message(
                 subject="Comprovativo da sua denúncia - SecureVoice MZ",
                 recipients=[report.email],
@@ -136,7 +99,7 @@ def report():
                 ),
             )
             user_message.attach(
-                f"comprovativo-{report.tracking_code}.pdf",
+                f"{report.tracking_code}.pdf",
                 "application/pdf",
                 receipt_pdf,
             )
@@ -187,7 +150,20 @@ def report():
                 "main.success",
                 tracking_code=tracking_code,
                 email_sent="1" if email_sent else "0",
+                report_id=report.id,
             )
         )
 
     return render_template("report.html")
+
+
+@report_bp.route("/download/<int:id>")
+def download_pdf(id):
+    report = Report.query.get_or_404(id)
+    pdf = generate_user_pdf(report)
+    return send_file(
+        BytesIO(pdf),
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"SecureVoice_{report.tracking_code}.pdf",
+    )

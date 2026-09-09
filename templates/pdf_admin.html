@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4; margin: 14mm 15mm 18mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; color: #172033; font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.45; }
+    .container { width: 90%; margin: auto; }
+    .header { text-align: center; border-bottom: 3px solid #0b3d91; padding-bottom: 10px; }
+    .brand { color: #0b3d91; font-size: 18pt; font-weight: bold; }
+    .subtitle, footer { color: #64748b; font-size: 8.5pt; }
+    .logo-center { text-align: center; margin-bottom: 8px; }
+    .logo-center img { width: 120px; }
+    footer img { width: 78px; max-height: 48px; object-fit: contain; }
+    .title { color: #0b3d91; text-align: center; font-size: 20px; font-weight: bold; margin: 20px 0; text-transform: uppercase; }
+    .section { border: 1px solid #cbd5e1; border-radius: 5px; margin-top: 14px; overflow: hidden; }
+    .section-title { background: #eaf2ff; border-bottom: 1px solid #cbd5e1; color: #0b3d91; font-weight: bold; padding: 9px 12px; font-size: 12pt; }
+    .section-body { padding: 12px; }
+    .data { display: flex; justify-content: space-between; gap: 14px; }
+    .data-column { width: 48%; }
+    .data-item { border-bottom: 1px solid #e5e7eb; padding: 7px 0; }
+    .label { display: block; color: #64748b; font-size: 8.5pt; font-weight: bold; }
+    .description, .notes { white-space: pre-wrap; overflow-wrap: break-word; background: #fafafa; border-left: 4px solid #cbd5e1; padding: 12px; min-height: 50px; }
+    .notes { background: #fff8e8; border-left-color: #f59e0b; }
+    .status { display: inline-block; padding: 6px 12px; border-radius: 4px; color: white; font-weight: bold; }
+    .status-recebido { background: #f59e0b; }
+    .status-em-analise { background: #2563eb; }
+    .status-resolvido { background: #16a34a; }
+    footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #cbd5e1; margin-top: 24px; padding-top: 10px; }
+    footer img { width: 78px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="header"><div class="logo-center"><img src="{{ logo_path }}" alt="SecureVoice MZ"></div><div class="brand">SecureVoice MZ</div><div class="subtitle">Relatório administrativo confidencial</div></header>
+    <div class="title">Relatório Oficial</div>
+    <section class="section"><div class="section-title">Dados da Denúncia</div><div class="section-body"><div class="data"><div class="data-column"><div class="data-item"><span class="label">Código</span>{{ report.tracking_code }}</div><div class="data-item"><span class="label">Categoria</span>{{ report.category }}</div><div class="data-item"><span class="label">Província</span>{{ report.province or '—' }}</div><div class="data-item"><span class="label">Contacto</span>{{ report.phone or '—' }}</div></div><div class="data-column"><div class="data-item"><span class="label">Distrito</span>{{ report.district or '—' }}</div><div class="data-item"><span class="label">Data</span>{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</div><div class="data-item"><span class="label">Email</span>{{ report.email or '—' }}</div></div></div></div></section>
+    <section class="section"><div class="section-title">Descrição</div><div class="section-body"><div class="description">{{ report.description }}</div></div></section>
+    <section class="section"><div class="section-title">Gestão Administrativa</div><div class="section-body"><div class="data"><div class="data-column"><div class="data-item"><span class="label">Status</span><span class="status status-{{ report.status|lower|replace(' ', '-')|replace('á', 'a') }}">{{ report.status }}</span></div></div><div class="data-column"><div class="data-item"><span class="label">Urgência</span>{{ report.urgency or 'Média' }}</div></div></div><div class="data-item"><span class="label">Admin Notes</span><div class="notes">{{ report.admin_notes or 'Sem notas internas.' }}</div></div></div></section>
+    <footer><div>SecureVoice MZ - Relatório Oficial<br>Exportado em {{ export_date }}</div><img src="{{ logo_path }}" alt="SecureVoice MZ"></footer>
+  </div>
+</body>
+</html>

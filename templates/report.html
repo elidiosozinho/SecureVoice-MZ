@@ -11,9 +11,9 @@
     <p class="error">{{ error }}</p>
   {% endif %}
 
-  <form method="post" enctype="multipart/form-data" class="report-form">
+  <form method="post" enctype="multipart/form-data" class="report-form" novalidate>
     <div class="form-group">
-      <label for="category">Categoria</label>
+      <label for="category">Categoria <span class="required-mark" aria-hidden="true">*</span></label>
       <select id="category" name="category" required>
         <option value="">Selecione</option>
         <option value="Violência">Violência</option>
@@ -25,15 +25,15 @@
 
     <div class="form-grid">
       <div class="form-group">
-        <label for="province">Província</label>
-        <select id="province" name="province">
+        <label for="province">Província <span class="required-mark" aria-hidden="true">*</span></label>
+        <select id="province" name="province" required>
           <option value="">Selecione a Província</option>
         </select>
       </div>
 
       <div class="form-group">
-        <label for="district">Distrito</label>
-        <select id="district" name="district" disabled>
+        <label for="district">Distrito <span class="required-mark" aria-hidden="true">*</span></label>
+        <select id="district" name="district" required disabled>
           <option value="">Selecione o Distrito</option>
         </select>
       </div>
@@ -51,16 +51,17 @@
     </div>
 
     <div class="form-group">
-      <label for="description">Descrição</label>
+      <label for="description">Descrição <span class="required-mark" aria-hidden="true">*</span></label>
       <textarea id="description" name="description" rows="5" required></textarea>
     </div>
 
     <div class="form-group">
-      <label>Email (obrigatório) e telefone (opcional)</label>
+      <label>Contacto <span class="required-mark" aria-hidden="true">*</span></label>
       <div class="phone-inline">
         <span class="phone-prefix" aria-hidden="true">+258</span>
-        <input type="tel" id="phone" name="phone" inputmode="numeric" pattern="[0-9]{8,9}" placeholder="número do telefone">
+        <input type="tel" id="phone" name="phone" inputmode="numeric" pattern="[0-9]{8,9}" placeholder="número do telefone" required>
       </div>
+      <label for="email" class="sr-only">Email <span class="required-mark" aria-hidden="true">*</span></label>
       <input type="email" id="email" name="email" placeholder="exemplo@email.com" required>
       <small class="form-help">O email recebe o comprovativo. Preencha o telefone apenas se desejar receber o código por SMS.</small>
     </div>

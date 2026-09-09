@@ -14,7 +14,9 @@
   {% endif %}
   {% endif %}
   <div class="success-actions">
-    <a class="btn btn-primary" href="{{ url_for('report_bp.report') }}">Fazer outra denúncia</a>
+    {% if report_id %}
+    <a class="btn btn-success" href="{{ url_for('report_bp.download_pdf', id=report_id) }}">Baixar Comprovativo (PDF)</a>
+    {% endif %}
     <a class="btn btn-secondary" href="{{ url_for('main.verificar') }}">Verificar denúncia</a>
     <a class="btn btn-secondary" href="{{ url_for('main.index') }}">Voltar ao início</a>
   </div>

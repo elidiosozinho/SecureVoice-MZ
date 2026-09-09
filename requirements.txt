@@ -3,4 +3,5 @@ gunicorn
 flask-mail
 flask-sqlalchemy
 reportlab
+weasyprint
 twilio

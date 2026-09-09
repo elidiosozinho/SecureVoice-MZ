@@ -14,6 +14,7 @@ const provincesData = {
 
 const provinceSelect = document.getElementById('province');
 const districtSelect = document.getElementById('district');
+const reportForm = document.querySelector('.report-form');
 
 if (provinceSelect && districtSelect) {
   Object.keys(provincesData).forEach(function (province) {
@@ -25,7 +26,7 @@ if (provinceSelect && districtSelect) {
 
   provinceSelect.addEventListener('change', function () {
     const selectedProvince = this.value;
-    districtSelect.innerHTML = '<option value="">Select District</option>';
+    districtSelect.innerHTML = '<option value="">Selecione o Distrito</option>';
 
     if (!selectedProvince) {
       districtSelect.disabled = true;
@@ -40,5 +41,37 @@ if (provinceSelect && districtSelect) {
     });
 
     districtSelect.disabled = false;
+  });
+}
+
+if (reportForm) {
+  reportForm.querySelectorAll('[required]').forEach(function (field) {
+    field.addEventListener('input', function () {
+      field.setCustomValidity('');
+    });
+    field.addEventListener('change', function () {
+      field.setCustomValidity('');
+    });
+  });
+
+  reportForm.addEventListener('submit', function (event) {
+    const firstEmptyField = Array.from(reportForm.querySelectorAll('[required]')).find(function (field) {
+      return !field.value.trim();
+    });
+    if (firstEmptyField) {
+      firstEmptyField.setCustomValidity('Preencha este campo');
+      firstEmptyField.reportValidity();
+      event.preventDefault();
+      return;
+    }
+
+    const invalidField = Array.from(reportForm.querySelectorAll('[required]')).find(function (field) {
+      return !field.checkValidity();
+    });
+    if (invalidField) {
+      invalidField.setCustomValidity('Introduza um valor válido');
+      invalidField.reportValidity();
+      event.preventDefault();
+    }
   });
 }

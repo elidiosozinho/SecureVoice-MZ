@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <style>
+    @page { size: A4; margin: 14mm 16mm 18mm; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: #ffffff; color: #172033; font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.45; }
+    .container { width: 90%; margin: auto; position: relative; z-index: 1; }
+    .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; width: 400px; z-index: -1; }
+    .header { text-align: center; border-bottom: 2px solid #0b3d91; padding-bottom: 10px; }
+    .logo-center { text-align: center; margin-bottom: 10px; }
+    .logo-center img { width: 120px; }
+    .brand { color: #0b3d91; font-size: 18pt; font-weight: bold; }
+    .subtitle { color: #64748b; font-size: 9pt; margin-top: 3px; }
+    footer img { width: 78px; max-height: 48px; object-fit: contain; }
+    .title { text-align: center; color: #0b3d91; font-size: 20px; margin-top: 20px; font-weight: bold; text-transform: uppercase; }
+    .code-box { background: #e6f0ff; border-left: 5px solid #0b3d91; border-radius: 4px; padding: 15px; margin: 20px 0; text-align: center; color: #0b3d91; font-size: 22px; font-weight: bold; letter-spacing: 1px; }
+    .section-title { color: #0b3d91; font-size: 12pt; margin: 18px 0 8px; font-weight: bold; }
+    .info-grid { display: flex; justify-content: space-between; margin-top: 20px; gap: 12px; }
+    .info-box { width: 48%; background: #f7f7f7; border: 1px solid #e1e6ed; border-radius: 5px; padding: 10px; }
+    .info-box p { margin: 0 0 7px; }
+    .info-box p:last-child { margin-bottom: 0; }
+    .label { color: #64748b; font-size: 8.5pt; font-weight: bold; }
+    .value { color: #172033; }
+    .status { margin-top: 15px; padding: 8px 14px; display: inline-block; border-radius: 5px; color: white; font-weight: bold; }
+    .status-recebido { background: #f59e0b; }
+    .status-em-analise { background: #2563eb; }
+    .status-resolvido { background: #16a34a; }
+    .urgency { background: #e6f0ff; border-left: 4px solid #0b3d91; padding: 8px 12px; display: inline-block; margin-top: 10px; color: #0b3d91; font-weight: bold; }
+    .description { margin-top: 20px; padding: 15px; background: #fafafa; border: 1px solid #e5e7eb; border-left: 4px solid #ccc; border-radius: 4px; white-space: pre-wrap; overflow-wrap: break-word; }
+    .response { margin-top: 12px; padding: 14px; background: #f0f7f4; border: 1px solid #c8e6d8; border-left: 4px solid #16855b; border-radius: 4px; white-space: pre-wrap; }
+    .trust { margin-top: 20px; padding: 11px; text-align: center; color: #64748b; background: #f5f5f5; border-radius: 5px; font-size: 9pt; }
+    .features { display: flex; justify-content: space-between; margin-top: 30px; text-align: center; }
+    .feature { width: 23%; padding: 9px 3px; background: #eef5ff; border-radius: 4px; color: #0b3d91; font-size: 8.5pt; font-weight: bold; }
+    .features-banner { margin-top: 24px; text-align: center; }
+    .features-banner img { width: 100%; max-width: 700px; max-height: 82px; object-fit: cover; }
+    footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #dce4ed; margin-top: 24px; padding-top: 10px; color: #64748b; font-size: 8.5pt; }
+    footer img { width: 78px; }
+  </style>
+</head>
+<body>
+  <img class="watermark" src="{{ logo_path }}" alt="">
+  <div class="container">
+    <header class="header">
+      <div class="logo-center"><img src="{{ logo_path }}" alt="SecureVoice MZ"></div>
+      <div class="brand">SecureVoice MZ</div><div class="subtitle">A sua voz. A sua segurança.</div>
+    </header>
+    <div class="title">Comprovativo de Denúncia</div>
+    <div class="code-box">{{ report.tracking_code }}</div>
+    <div class="section-title">Informações da denúncia</div>
+    <div class="info-grid">
+      <div class="info-box">
+        <p><span class="label">Categoria</span><br><span class="value">{{ report.category }}</span></p>
+        <p><span class="label">Província</span><br><span class="value">{{ report.province or '—' }}</span></p>
+        <p><span class="label">Distrito</span><br><span class="value">{{ report.district or '—' }}</span></p>
+      </div>
+      <div class="info-box">
+        <p><span class="label">Data de criação</span><br><span class="value">{{ report.created_at.strftime('%d/%m/%Y %H:%M') }}</span></p>
+        <p><span class="label">Urgência</span><br><span class="urgency">{{ report.urgency or 'Média' }}</span></p>
+        <p><span class="label">Estado atual</span><br><span class="status status-{{ report.status|lower|replace(' ', '-')|replace('á', 'a') }}">{{ report.status }}</span></p>
+      </div>
+    </div>
+    <div class="section-title">Descrição</div>
+    <div class="description">{{ report.description }}</div>
+    {% if report.admin_notes %}<div class="section-title">Resposta da Equipa</div><div class="response">{{ report.admin_notes }}</div>{% endif %}
+    <div class="trust">Este sistema protege a sua identidade.<br>Nenhuma informação pessoal é exposta sem consentimento.</div>
+    <div class="features"><div class="feature">🛡️<br>SEGURO</div><div class="feature">🔒<br>CONFIDENCIAL</div><div class="feature">⚡<br>SIMPLES</div><div class="feature">🌍<br>IMPACTO</div></div>
+    <div class="features-banner"><img src="{{ banner_path }}" alt="SecureVoice MZ - Seguro, confidencial, simples e impacto"></div>
+    <footer><div>SecureVoice MZ - A sua voz. A sua segurança.<br>{{ config.WEBSITE_URL }}<br>Gerado automaticamente pelo sistema</div><img src="{{ logo_path }}" alt="SecureVoice MZ"></footer>
+  </div>
+</body>
+</html>

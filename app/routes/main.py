@@ -14,7 +14,13 @@ def index():
 def success():
     tracking_code = request.args.get("tracking_code")
     email_sent = request.args.get("email_sent") == "1"
-    return render_template("success.html", tracking_code=tracking_code, email_sent=email_sent)
+    report_id = request.args.get("report_id", type=int)
+    return render_template(
+        "success.html",
+        tracking_code=tracking_code,
+        email_sent=email_sent,
+        report_id=report_id,
+    )
 
 
 @main.route("/verificar", methods=["GET", "POST"])
@@ -31,4 +37,9 @@ def verificar():
         else:
             error = "Introduza um código válido"
 
-    return render_template("verify.html", report=report, error=error)
+    return render_template(
+        "verify.html",
+        report=report,
+        report_id=report.id if report else None,
+        error=error,
+    )

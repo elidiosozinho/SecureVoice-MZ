@@ -12,15 +12,34 @@
   {% endif %}
 
   <form method="post" class="verify-form">
-    <input type="text" name="tracking_code" placeholder="Ex: MZ-ABC123" required>
-    <button class="btn btn-primary" type="submit">Verificar</button>
+    <label for="tracking-code">Código de acompanhamento</label>
+    <div class="verify-input-row">
+      <input id="tracking-code" type="text" name="tracking_code" placeholder="Ex: MZ-ABC123" required>
+      <button class="btn btn-primary" type="submit">Verificar</button>
+    </div>
   </form>
 
   {% if report %}
   <div class="verify-result">
-    <p><strong>Categoria:</strong> {{ report.category }}</p>
-    <p><strong>Província:</strong> {{ report.province or '—' }}</p>
-    <p><strong>Status:</strong> {{ report.status }}</p>
+    <div class="verify-result-header">
+      <div>
+        <span class="verify-kicker">Resultado da denúncia</span>
+        <h3>{{ report.tracking_code }}</h3>
+      </div>
+      <span class="status-badge status-{{ report.status|lower|replace(' ', '-') }}">{{ report.status }}</span>
+    </div>
+    <div class="verify-summary">
+      <p><strong>Categoria</strong><span>{{ report.category }}</span></p>
+      <p><strong>Província</strong><span>{{ report.province or '—' }}</span></p>
+      <p><strong>Distrito</strong><span>{{ report.district or '—' }}</span></p>
+    </div>
+    {% if report_id %}
+    <a href="{{ url_for('report_bp.download_pdf', id=report_id) }}" class="btn btn-success btn-pdf">Baixar Comprovativo<br><small>(PDF)</small></a>
+    <div class="pdf-preview">
+      <span>Pré-visualização do comprovativo</span>
+      <iframe src="{{ url_for('report_bp.download_pdf', id=report_id) }}" title="Pré-visualização do comprovativo PDF"></iframe>
+    </div>
+    {% endif %}
   </div>
   {% endif %}
 </div>

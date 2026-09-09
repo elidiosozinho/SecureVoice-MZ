@@ -65,9 +65,6 @@
   </div>
 
   {% if reports %}
-  <div class="table-toolbar no-print">
-    <button type="button" class="btn btn-secondary" onclick="window.print()">Imprimir (Vertical)</button>
-  </div>
   <div class="table-wrap">
     <table class="report-table">
       <thead>
@@ -127,6 +124,7 @@
             <form method="post" action="{{ url_for('admin_bp.delete_report', id=report.id) }}" class="delete-form" onsubmit="return confirm('Eliminar esta denúncia?');">
               <button type="submit" class="btn btn-small btn-danger">Eliminar</button>
             </form>
+            <a class="btn btn-primary btn-small" href="{{ url_for('admin_bp.download_admin_pdf', id=report.id) }}" aria-label="Exportar PDF">PDF</a>
           </td>
         </tr>
         {% endfor %}
