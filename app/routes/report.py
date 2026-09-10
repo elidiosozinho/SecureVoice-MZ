@@ -1,5 +1,6 @@
 import os
 import uuid
+from functools import wraps
 from io import BytesIO
 
 from flask import Blueprint, current_app, redirect, render_template, request, send_file, url_for
@@ -14,6 +15,20 @@ report_bp = Blueprint("report_bp", __name__)
 
 ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
 MAX_FILE_SIZE = 2 * 1024 * 1024
+
+
+def _report_error_boundary(view):
+    @wraps(view)
+    def wrapped(*args, **kwargs):
+        try:
+            return view(*args, **kwargs)
+        except Exception as exc:
+            db.session.rollback()
+            print("MAIN ERROR:", str(exc))
+            current_app.logger.exception("Erro não tratado no fluxo de denúncia.")
+            return f"Erro interno: {exc}", 500
+
+    return wrapped
 
 
 def _mail_is_configured():
@@ -91,6 +106,7 @@ def _save_upload(uploaded_file):
 
 
 @report_bp.route("/report", methods=["GET", "POST"])
+@_report_error_boundary
 def report():
     if request.method == "POST":
         category = request.form.get("category", "").strip()
@@ -116,6 +132,8 @@ def report():
                 return render_template("report.html", error=str(exc))
 
         tracking_code = uuid.uuid4().hex[:8].upper()
+        print("EMAIL:", email)
+        print("CODIGO:", tracking_code)
         report = Report(
             category=category,
             description=description,
@@ -137,6 +155,7 @@ def report():
                 enviar_email(report.email, report.tracking_code)
                 email_sent = True
             except Exception as exc:
+                print("EMAIL USER ERROR:", str(exc))
                 current_app.logger.exception("Erro email: %s", exc)
 
         if _mail_is_configured():
@@ -148,6 +167,7 @@ def report():
                     report.urgency,
                 )
             except Exception as exc:
+                print("EMAIL ADMIN ERROR:", str(exc))
                 current_app.logger.exception("Erro admin email: %s", exc)
 
         twilio_settings = (
@@ -164,7 +184,8 @@ def report():
                     from_=twilio_settings[2],
                     to=_format_phone_number(report.phone),
                 )
-            except Exception:
+            except Exception as exc:
+                print("SMS ERROR:", str(exc))
                 current_app.logger.exception("Não foi possível enviar o SMS de confirmação.")
 
         return redirect(
