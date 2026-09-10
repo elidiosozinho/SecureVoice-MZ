@@ -130,12 +130,14 @@ def download_admin_pdf(id):
 
     report = Report.query.get_or_404(id)
     pdf = generate_admin_pdf(report)
-    return send_file(
+    response = send_file(
         BytesIO(pdf),
         mimetype="application/pdf",
         as_attachment=True,
         download_name=f"Admin_Report_{report.tracking_code}.pdf",
     )
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response
 
 
 @admin_bp.route("/admin/delete/<int:id>", methods=["POST"])

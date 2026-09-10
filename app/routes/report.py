@@ -16,6 +16,72 @@ ALLOWED_EXTENSIONS = {"jpg", "jpeg", "png"}
 MAX_FILE_SIZE = 2 * 1024 * 1024
 
 
+def _mail_is_configured():
+    return bool(
+        current_app.config.get("MAIL_USERNAME")
+        and current_app.config.get("MAIL_PASSWORD")
+    )
+
+
+def enviar_email(destino, codigo):
+    message = Message(
+        subject="SecureVoice MZ - Denúncia Recebida",
+        sender=current_app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[destino],
+        body=(
+            "A sua denúncia foi recebida com sucesso.\n\n"
+            f"Código de acompanhamento: {codigo}\n\n"
+            "Guarde este código para verificar o estado da sua denúncia.\n\n"
+            "A sua voz faz a diferença.\n"
+            "Obrigado por contribuir para um Moçambique melhor.\n\n"
+            "SecureVoice MZ\n"
+            "Email: securevoicemz@gmail.com\n"
+        ),
+    )
+    mail.send(message)
+
+
+def enviar_email_com_pdf(destino, codigo, pdf_bytes):
+    message = Message(
+        subject="SecureVoice MZ - Comprovativo da Denúncia",
+        sender=current_app.config["MAIL_DEFAULT_SENDER"],
+        recipients=[destino],
+        body=(
+            "Segue em anexo o comprovativo da sua denúncia.\n\n"
+            f"Código: {codigo}\n\n"
+            "SecureVoice MZ\n"
+            "Email: securevoicemz@gmail.com\n"
+        ),
+    )
+    message.attach(
+        filename=f"denuncia_{codigo}.pdf",
+        content_type="application/pdf",
+        data=pdf_bytes,
+    )
+    mail.send(message)
+
+
+def notificar_admin(codigo, categoria, provincia, urgencia):
+    admin_address = current_app.config["MAIL_DEFAULT_SENDER"]
+    admin_url = f"{current_app.config.get('WEBSITE_URL', '').rstrip('/')}/admin"
+    message = Message(
+        subject="Nova denúncia recebida - SecureVoice MZ",
+        sender=admin_address,
+        recipients=[admin_address],
+        body=(
+            "Nova denúncia recebida.\n\n"
+            f"Código: {codigo}\n"
+            f"Categoria: {categoria}\n"
+            f"Província: {provincia or '—'}\n"
+            f"Urgência: {urgencia}\n\n"
+            f"Acesse: {admin_url}\n\n"
+            "SecureVoice MZ\n"
+            "Email: securevoicemz@gmail.com\n"
+        ),
+    )
+    mail.send(message)
+
+
 def _format_phone_number(phone):
     digits = "".join(character for character in phone if character.isdigit())
     if digits.startswith("258"):
@@ -88,43 +154,20 @@ def report():
         receipt_pdf = None
         try:
             receipt_pdf = generate_user_pdf(report)
-            user_message = Message(
-                subject="Comprovativo da sua denúncia - SecureVoice MZ",
-                recipients=[report.email],
-                body=(
-                    "A sua denúncia foi recebida com sucesso.\n\n"
-                    f"Código de acompanhamento: {report.tracking_code}\n\n"
-                    "Guarde este código para acompanhar o estado da denúncia em SecureVoice MZ.\n"
-                    "O comprovativo segue em anexo."
-                ),
-            )
-            user_message.attach(
-                f"{report.tracking_code}.pdf",
-                "application/pdf",
-                receipt_pdf,
-            )
-            if current_app.config.get("MAIL_USERNAME") and current_app.config.get("MAIL_PASSWORD"):
-                mail.send(user_message)
+            if _mail_is_configured():
+                enviar_email_com_pdf(report.email, report.tracking_code, receipt_pdf)
                 email_sent = True
         except Exception:
             current_app.logger.exception("Não foi possível enviar o comprovativo por email.")
 
-        admin_email = current_app.config.get("MAIL_USERNAME")
-        if admin_email and current_app.config.get("MAIL_PASSWORD"):
-            message = Message(
-                subject=f"Nova denúncia recebida - Código: {report.tracking_code}",
-                recipients=[admin_email],
-                body=(
-                    f"Código: {report.tracking_code}\n"
-                    f"Categoria: {report.category}\n"
-                    f"Província: {report.province or '—'}\n"
-                    f"Distrito: {report.district or '—'}\n\n"
-                    "Descrição completa da denúncia:\n"
-                    f"{report.description}"
-                ),
-            )
+        if _mail_is_configured():
             try:
-                mail.send(message)
+                notificar_admin(
+                    report.tracking_code,
+                    report.category,
+                    report.province,
+                    report.urgency,
+                )
             except Exception:
                 current_app.logger.exception("Não foi possível enviar a notificação da denúncia.")
 
@@ -161,9 +204,11 @@ def report():
 def download_pdf(id):
     report = Report.query.get_or_404(id)
     pdf = generate_user_pdf(report)
-    return send_file(
+    response = send_file(
         BytesIO(pdf),
         mimetype="application/pdf",
         as_attachment=True,
         download_name=f"SecureVoice_{report.tracking_code}.pdf",
     )
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response

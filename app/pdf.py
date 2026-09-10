@@ -148,7 +148,7 @@ def _fallback_pdf(report, admin_report=False):
             document.drawImage(ImageReader(banner_path), left, 48, width=width, height=42, preserveAspectRatio=True, anchor="sw", mask="auto")
     document.setFillColor(colors.HexColor("#64748b"))
     document.setFont("Helvetica", 8)
-    document.drawCentredString(A4[0] / 2, 36, "SecureVoice MZ - A sua voz. A sua segurança.")
+    document.drawCentredString(A4[0] / 2, 36, "SecureVoice MZ - A sua voz. A sua segurança. | Email: securevoicemz@gmail.com")
     document.save()
     buffer.seek(0)
     return buffer.read()
