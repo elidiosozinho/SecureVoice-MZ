@@ -19,7 +19,7 @@ def create_app():
     app.config["SECRET_KEY"] = os.environ.get(
         "SECRET_KEY", "default_local_fallback_secret_key_98765"
     )
-    app.config["DEBUG"] = True
+    app.config["DEBUG"] = os.environ.get("FLASK_DEBUG", "0") == "1"
 
     db.init_app(app)
     mail.init_app(app)
