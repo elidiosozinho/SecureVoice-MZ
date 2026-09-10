@@ -17,7 +17,6 @@ def _render_pdf(template_name, report):
             template_name,
             report=report,
             logo_path=_logo_path(),
-            banner_path="banner.png",
             export_date=datetime.now().strftime("%d/%m/%Y %H:%M"),
         )
         return HTML(
@@ -143,9 +142,6 @@ def _fallback_pdf(report, admin_report=False):
         document.setFont("Helvetica", 8)
         document.drawCentredString(A4[0] / 2, trust_y - 14, "Este sistema protege a sua identidade.")
         document.drawCentredString(A4[0] / 2, trust_y - 25, "Nenhuma informação pessoal é exposta sem consentimento.")
-        banner_path = os.path.join(current_app.root_path, "static", "banner.png")
-        if os.path.exists(banner_path):
-            document.drawImage(ImageReader(banner_path), left, 48, width=width, height=42, preserveAspectRatio=True, anchor="sw", mask="auto")
     document.setFillColor(colors.HexColor("#64748b"))
     document.setFont("Helvetica", 8)
     document.drawCentredString(A4[0] / 2, 36, "SecureVoice MZ - A sua voz. A sua segurança. | Email: securevoicemz@gmail.com")

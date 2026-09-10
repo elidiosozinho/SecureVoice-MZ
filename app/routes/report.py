@@ -32,31 +32,12 @@ def enviar_email(destino, codigo):
             "A sua denúncia foi recebida com sucesso.\n\n"
             f"Código de acompanhamento: {codigo}\n\n"
             "Guarde este código para verificar o estado da sua denúncia.\n\n"
+            "Verifique aqui: https://securevoice-mz.onrender.com/verificar\n\n"
             "A sua voz faz a diferença.\n"
             "Obrigado por contribuir para um Moçambique melhor.\n\n"
             "SecureVoice MZ\n"
             "Email: securevoicemz@gmail.com\n"
         ),
-    )
-    mail.send(message)
-
-
-def enviar_email_com_pdf(destino, codigo, pdf_bytes):
-    message = Message(
-        subject="SecureVoice MZ - Comprovativo da Denúncia",
-        sender=current_app.config["MAIL_DEFAULT_SENDER"],
-        recipients=[destino],
-        body=(
-            "Segue em anexo o comprovativo da sua denúncia.\n\n"
-            f"Código: {codigo}\n\n"
-            "SecureVoice MZ\n"
-            "Email: securevoicemz@gmail.com\n"
-        ),
-    )
-    message.attach(
-        filename=f"denuncia_{codigo}.pdf",
-        content_type="application/pdf",
-        data=pdf_bytes,
     )
     mail.send(message)
 
@@ -151,14 +132,12 @@ def report():
         db.session.commit()
 
         email_sent = False
-        receipt_pdf = None
-        try:
-            receipt_pdf = generate_user_pdf(report)
-            if _mail_is_configured():
-                enviar_email_com_pdf(report.email, report.tracking_code, receipt_pdf)
+        if _mail_is_configured() and report.email:
+            try:
+                enviar_email(report.email, report.tracking_code)
                 email_sent = True
-        except Exception:
-            current_app.logger.exception("Não foi possível enviar o comprovativo por email.")
+            except Exception as exc:
+                current_app.logger.exception("Erro email: %s", exc)
 
         if _mail_is_configured():
             try:
@@ -168,8 +147,8 @@ def report():
                     report.province,
                     report.urgency,
                 )
-            except Exception:
-                current_app.logger.exception("Não foi possível enviar a notificação da denúncia.")
+            except Exception as exc:
+                current_app.logger.exception("Erro admin email: %s", exc)
 
         twilio_settings = (
             current_app.config.get("TWILIO_ACCOUNT_SID"),
@@ -203,6 +182,20 @@ def report():
 @report_bp.route("/download/<int:id>")
 def download_pdf(id):
     report = Report.query.get_or_404(id)
+    pdf = generate_user_pdf(report)
+    response = send_file(
+        BytesIO(pdf),
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=f"SecureVoice_{report.tracking_code}.pdf",
+    )
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+    return response
+
+
+@report_bp.route("/download/<string:tracking_code>")
+def download_pdf_by_code(tracking_code):
+    report = Report.query.filter_by(tracking_code=tracking_code.strip().upper()).first_or_404()
     pdf = generate_user_pdf(report)
     response = send_file(
         BytesIO(pdf),

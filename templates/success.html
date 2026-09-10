@@ -8,14 +8,14 @@
   <p><strong>Código de acompanhamento:</strong> {{ tracking_code }}</p>
   <p>Guarde este código para verificar o estado da sua denúncia.</p>
   {% if email_sent %}
-  <p>A sua denúncia foi recebida com sucesso.<br>Foi enviado um comprovativo para o seu email.</p>
+  <p>Foi enviado um email de confirmação. O PDF pode ser descarregado abaixo.</p>
   {% else %}
-  <p>A sua denúncia foi recebida com sucesso. O comprovativo não pôde ser enviado neste momento.</p>
+  <p>O email de confirmação não pôde ser enviado neste momento. O PDF continua disponível abaixo.</p>
   {% endif %}
   {% endif %}
   <div class="success-actions">
     {% if report_id %}
-    <a class="btn btn-success" href="{{ url_for('report_bp.download_pdf', id=report_id) }}">Baixar Comprovativo (PDF)</a>
+    <a class="btn btn-success" href="{{ url_for('report_bp.download_pdf_by_code', tracking_code=tracking_code) }}">Baixar Comprovativo (PDF)</a>
     {% endif %}
     <a class="btn btn-secondary" href="{{ url_for('main.verificar') }}">Verificar denúncia</a>
     <a class="btn btn-secondary" href="{{ url_for('main.index') }}">Voltar ao início</a>

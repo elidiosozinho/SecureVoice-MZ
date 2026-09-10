@@ -7,7 +7,7 @@
     * { box-sizing: border-box; }
     body { margin: 0; background: #ffffff; color: #172033; font-family: Arial, sans-serif; font-size: 10pt; line-height: 1.45; }
     .container { width: 90%; margin: auto; position: relative; z-index: 1; }
-    .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; width: 400px; z-index: -1; }
+    .watermark { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.03; width: 200px; z-index: -1; }
     .header { text-align: center; border-bottom: 2px solid #0b3d91; padding-bottom: 10px; }
     .logo-center { text-align: center; margin-bottom: 10px; }
     .logo-center img { width: 120px; }
@@ -34,8 +34,6 @@
     .features { display: flex; justify-content: space-between; margin-top: 30px; text-align: center; }
     .feature { width: 23%; padding: 9px 3px; background: #eef5ff; border-radius: 4px; color: #0b3d91; font-size: 8.5pt; font-weight: bold; }
     .feature span { display: block; margin-top: 4px; color: #64748b; font-size: 7.5pt; font-weight: normal; }
-    .features-banner { margin-top: 24px; text-align: center; }
-    .features-banner img { width: 100%; max-width: 700px; max-height: 82px; object-fit: cover; }
     footer { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid #dce4ed; margin-top: 24px; padding-top: 10px; color: #64748b; font-size: 8.5pt; }
     footer img { width: 78px; }
   </style>
@@ -67,7 +65,6 @@
     {% if report.admin_notes %}<div class="section-title">Resposta da Equipa</div><div class="response">{{ report.admin_notes }}</div>{% endif %}
     <div class="trust">Este sistema protege a sua identidade.<br>Nenhuma informação pessoal é exposta sem consentimento.</div>
     <div class="features"><div class="feature">🛡️<br>SEGURO<span>Denúncias anónimas e protegidas</span></div><div class="feature">🔒<br>CONFIDENCIAL<span>A sua identidade é preservada</span></div><div class="feature">⚡<br>SIMPLES<span>Fácil de usar, onde estiver</span></div><div class="feature">🌍<br>IMPACTO<span>Cidadãos e instituições por um país melhor</span></div></div>
-    <div class="features-banner"><img src="{{ banner_path }}" alt="SecureVoice MZ - Seguro, confidencial, simples e impacto"></div>
     <footer><div>SecureVoice MZ - A sua voz. A sua segurança.<br>Email: securevoicemz@gmail.com<br>{{ config.WEBSITE_URL }}<br>Gerado automaticamente pelo sistema</div><img src="{{ logo_path }}" alt="SecureVoice MZ"></footer>
   </div>
 </body>

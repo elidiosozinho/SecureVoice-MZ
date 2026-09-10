@@ -34,10 +34,10 @@
       <p><strong>Distrito</strong><span>{{ report.district or '—' }}</span></p>
     </div>
     {% if report_id %}
-    <a href="{{ url_for('report_bp.download_pdf', id=report_id) }}" class="btn btn-success btn-pdf">Baixar Comprovativo<br><small>(PDF)</small></a>
+    <a href="{{ url_for('report_bp.download_pdf_by_code', tracking_code=report.tracking_code) }}" class="btn btn-success btn-pdf">Baixar Comprovativo<br><small>(PDF)</small></a>
     <div class="pdf-preview">
       <span>Pré-visualização do comprovativo</span>
-      <iframe src="{{ url_for('report_bp.download_pdf', id=report_id) }}" title="Pré-visualização do comprovativo PDF"></iframe>
+      <iframe src="{{ url_for('report_bp.download_pdf_by_code', tracking_code=report.tracking_code) }}" title="Pré-visualização do comprovativo PDF"></iframe>
     </div>
     {% endif %}
   </div>
