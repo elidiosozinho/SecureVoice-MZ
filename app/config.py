@@ -3,12 +3,15 @@ from datetime import timedelta
 
 
 BASE_DIR = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
+database_url = os.environ.get("DATABASE_URL")
+if database_url and database_url.startswith("postgres://"):
+    database_url = database_url.replace("postgres://", "postgresql://", 1)
 
 
 class Config:
     SECRET_KEY = os.environ.get("SECRET_KEY", "default_fallback_secret_key_123")
     PERMANENT_SESSION_LIFETIME = timedelta(minutes=15)
-    SQLALCHEMY_DATABASE_URI = f"sqlite:///{os.path.join(BASE_DIR, 'database', 'securevoice.db')}"
+    SQLALCHEMY_DATABASE_URI = database_url or "sqlite:///local.db"
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
     MAIL_SERVER = "smtp.gmail.com"

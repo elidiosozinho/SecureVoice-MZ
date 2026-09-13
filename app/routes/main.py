@@ -1,6 +1,6 @@
 from flask import Blueprint, redirect, render_template, request, url_for
 
-from app.models import Report
+from app.models import Report, db
 
 main = Blueprint("main", __name__)
 
@@ -43,3 +43,13 @@ def verificar():
         report_id=report.id if report else None,
         error=error,
     )
+
+
+@main.route("/test-db")
+def test_db():
+    try:
+        reports = Report.query.count()
+        return f"DB OK - {reports} reports found"
+    except Exception as exc:
+        db.session.rollback()
+        return f"DB ERROR: {exc}", 500

@@ -2,6 +2,7 @@ flask
 gunicorn
 flask-mail
 flask-sqlalchemy
+psycopg2-binary
 reportlab
 weasyprint
 twilio
