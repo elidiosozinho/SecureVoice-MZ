@@ -27,6 +27,9 @@ def _region_for_province(province):
 
 @admin_bp.route("/admin/login", methods=["GET", "POST"])
 def login():
+    if session.get("admin_logged_in"):
+        return redirect(url_for("admin_bp.admin"))
+
     error = None
     if request.method == "POST":
         username = request.form.get("username", "").strip()
@@ -45,8 +48,10 @@ def login():
 
 @admin_bp.route("/admin/logout")
 def logout():
-    session.clear()
-    return redirect(url_for("main.index"))
+    session.pop("admin_logged_in", None)
+    session.pop("admin_username", None)
+    session.pop("login_time", None)
+    return redirect(url_for("admin_bp.login"))
 
 
 @admin_bp.route("/admin")
